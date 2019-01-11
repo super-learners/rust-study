@@ -8,7 +8,7 @@ fn main() {
     for _i in 0..num_of_testcases {
         let num = read_line_from_stdin().trim()
             .parse().expect("Error parsing the input");
-        let answer = solve_inefficiently(num);
+        let answer = solve_with_cheatsheet(num);
         println!("{} {}", answer.0, answer.1);
     }
 }
@@ -39,10 +39,13 @@ fn solve_with_cheatsheet(num: i32) -> (i32, i32) {
     cheatsheet.insert(0, (1, 0));
     cheatsheet.insert(1, (0, 1));
 
+    let mut pp = (1, 0);
+    let mut p = (0, 1);
     for i in 2..(num + 1) {
-        let pp = cheatsheet.get(&(i - 2)).expect("impossible");
-        let p  = cheatsheet.get(&(i - 1)).expect("impossible");
-        cheatsheet.insert(i, (pp.0 + p.0, pp.1 + p.1));
+        let c = (pp.0 + p.0, pp.1 + p.1);
+        cheatsheet.insert(i, c);
+        pp = p;
+        p = c;
     }
 
     *cheatsheet.get(&num).expect("impossible")
