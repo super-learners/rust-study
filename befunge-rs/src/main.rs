@@ -22,8 +22,9 @@ struct Environment {
 
 trait Interpreter {
     fn new() -> Self;
-    fn add(&mut self) -> i8;
-    fn subtract(&mut self) -> i8;
+    fn add(&mut self);
+    fn subtract(&mut self);
+    fn multiply(&mut self);
     fn duplicate(&mut self);
     fn print_int(&mut self) -> i8;
     fn print_char(&mut self) -> char;
@@ -32,6 +33,7 @@ trait Interpreter {
     fn nop(&mut self);
     fn step(&mut self);
     fn horizontal_if(&mut self);
+    fn get(&mut self);
     fn run(&mut self, command: &str);
 }
 
@@ -48,18 +50,25 @@ impl Interpreter for Environment {
         }
     }
 
-    fn add(&mut self) -> i8 {
+    fn add(&mut self) {
         let a: i8 = self.stack.pop().unwrap();
         let b: i8 = self.stack.pop().unwrap();
 
-        return a + b;
+        self.stack.push(a + b);
     }
 
-    fn subtract(&mut self) -> i8 {
+    fn subtract(&mut self) {
         let a: i8 = self.stack.pop().unwrap();
         let b: i8 = self.stack.pop().unwrap();
 
-        return a - b;
+        self.stack.push(b - a);
+    }
+
+    fn multiply(&mut self) {
+        let a: i8 = self.stack.pop().unwrap();
+        let b: i8 = self.stack.pop().unwrap();
+
+        self.stack.push(a * b);
     }
 
     fn duplicate(&mut self) {
@@ -127,6 +136,18 @@ impl Interpreter for Environment {
         }
     }
 
+    fn get(&mut self) {
+        let y = self.stack.pop().unwrap();
+        let x = self.stack.pop().unwrap();
+
+        let ch = self.commands
+            .get(y as usize)
+            .unwrap()
+            .as_bytes()[x as usize] as char;
+
+        self.stack.push(ch as i8);
+    }
+
     fn run(&mut self, command: &str) {
         self.commands = command.to_string()
             .split('\n')
@@ -157,6 +178,12 @@ impl Interpreter for Environment {
                 '"' => {
                     self.enter_string_mode();
                 },
+                '-' => {
+                    self.subtract();
+                },
+                '*' => {
+                    self.multiply();
+                },
                 '>' => {
                     self.pc_direction = PcDirection::Right;
                 },
@@ -183,6 +210,9 @@ impl Interpreter for Environment {
                 },
                 '_' => {
                     self.horizontal_if();
+                },
+                'g' => {
+                    self.get();
                 },
                 '@' => {
                     break;
