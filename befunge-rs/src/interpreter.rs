@@ -26,6 +26,9 @@ pub trait Interpreter {
     fn add(&mut self);
     fn subtract(&mut self);
     fn multiply(&mut self);
+    fn integer_division(&mut self);
+    fn modulo(&mut self);
+    fn logical_not(&mut self);
     fn duplicate(&mut self);
     fn print_int(&mut self) -> i8;
     fn print_char(&mut self) -> char;
@@ -72,6 +75,26 @@ impl Interpreter for Environment {
 
         self.stack.push(a * b);
     }
+
+    fn integer_division(&mut self) {
+        let a: i8 = self.stack.pop().unwrap();
+        let b: i8 = self.stack.pop().unwrap();
+
+        self.stack.push(b / a);
+    }
+
+    fn modulo(&mut self) {
+        let a: i8 = self.stack.pop().unwrap();
+        let b: i8 = self.stack.pop().unwrap();
+
+        self.stack.push(b % a);
+    }
+
+    fn logical_not(&mut self) {
+        let a: i8 = self.stack.pop().unwrap();
+        self.stack.push(if a == 0 { 1 } else { 0 });
+    }
+
 
     fn duplicate(&mut self) {
         let n: i8 = self.stack.pop().unwrap_or(0);
