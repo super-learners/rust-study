@@ -8,8 +8,8 @@ mod tests {
     #[test]
     fn test_hello() {
         let cmd = String::from("64+\"!dlroW ,olleH\">:#,_@");
-        let mut i: Environment = Interpreter::new();
-        let output = i.run(&cmd);
+        let mut interpreter: Environment = Interpreter::new();
+        let output = interpreter.run(&cmd);
 
         assert_eq!(output, "Hello, World!\n");
     }
