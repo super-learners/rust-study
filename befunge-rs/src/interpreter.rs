@@ -29,6 +29,7 @@ pub trait Interpreter {
     fn integer_division(&mut self);
     fn modulo(&mut self);
     fn logical_not(&mut self);
+    fn greater_than(&mut self);
     fn duplicate(&mut self);
     fn print_int(&mut self) -> i8;
     fn print_char(&mut self) -> char;
@@ -95,6 +96,12 @@ impl Interpreter for Environment {
         self.stack.push(if a == 0 { 1 } else { 0 });
     }
 
+    fn greater_than(&mut self) {
+        let a: i8 = self.stack.pop().unwrap();
+        let b: i8 = self.stack.pop().unwrap();
+
+        self.stack.push(if b > a { 1 } else { 0 });
+    }
 
     fn duplicate(&mut self) {
         let n: i8 = self.stack.pop().unwrap_or(0);
@@ -212,6 +219,18 @@ impl Interpreter for Environment {
                 },
                 '*' => {
                     self.multiply();
+                },
+                '/' => {
+                    self.integer_division();
+                },
+                '%' => {
+                    self.modulo();
+                },
+                '!' => {
+                    self.logical_not();
+                },
+                '`' => {
+                    self.greater_than();
                 },
                 '>' => {
                     self.pc_direction = PcDirection::Right;
