@@ -31,8 +31,8 @@ pub trait Interpreter {
     fn logical_not(&mut self);
     fn greater_than(&mut self);
     fn duplicate(&mut self);
-    fn print_int(&mut self) -> i8;
-    fn print_char(&mut self) -> char;
+    fn print_int(&mut self);
+    fn print_char(&mut self);
     fn enter_string_mode(&mut self);
     fn exit_string_mode(&mut self);
     fn nop(&mut self);
@@ -57,75 +57,109 @@ impl Interpreter for Environment {
     }
 
     fn add(&mut self) {
-        let a: i8 = self.stack.pop().unwrap();
-        let b: i8 = self.stack.pop().unwrap();
+        let a: Option<i8> = self.stack.pop();
+        let b: Option<i8> = self.stack.pop();
 
-        self.stack.push(a + b);
+        match (a, b) {
+            (Some(x), Some(y)) => self.stack.push(x + y),
+            _ => (),
+        }
     }
 
     fn subtract(&mut self) {
-        let a: i8 = self.stack.pop().unwrap();
-        let b: i8 = self.stack.pop().unwrap();
+        let a: Option<i8> = self.stack.pop();
+        let b: Option<i8> = self.stack.pop();
 
-        self.stack.push(b - a);
+        match (a, b) {
+            (Some(x), Some(y)) => self.stack.push(y - x),
+            _ => (),
+        }
     }
 
     fn multiply(&mut self) {
-        let a: i8 = self.stack.pop().unwrap();
-        let b: i8 = self.stack.pop().unwrap();
+        let a: Option<i8> = self.stack.pop();
+        let b: Option<i8> = self.stack.pop();
 
-        self.stack.push(a * b);
+        match (a, b) {
+            (Some(x), Some(y)) => self.stack.push(x * y),
+            _ => (),
+        }
     }
 
     fn integer_division(&mut self) {
-        let a: i8 = self.stack.pop().unwrap();
-        let b: i8 = self.stack.pop().unwrap();
+        let a: Option<i8> = self.stack.pop();
+        let b: Option<i8> = self.stack.pop();
 
-        self.stack.push(b / a);
+        match (a, b) {
+            (Some(x), Some(y)) => self.stack.push(y / x),
+            _ => (),
+        }
     }
 
     fn modulo(&mut self) {
-        let a: i8 = self.stack.pop().unwrap();
-        let b: i8 = self.stack.pop().unwrap();
+        let a: Option<i8> = self.stack.pop();
+        let b: Option<i8> = self.stack.pop();
 
-        self.stack.push(b % a);
+        match (a, b) {
+            (Some(x), Some(y)) => self.stack.push(y % x),
+            _ => (),
+        }
     }
 
     fn logical_not(&mut self) {
-        let a: i8 = self.stack.pop().unwrap();
-        self.stack.push(if a == 0 { 1 } else { 0 });
+        let a: Option<i8> = self.stack.pop();
+
+        match a {
+            Some(x) => self.stack.push(if x == 0 { 1 } else { 0 }),
+            _ => (),
+        }
     }
 
     fn greater_than(&mut self) {
-        let a: i8 = self.stack.pop().unwrap();
-        let b: i8 = self.stack.pop().unwrap();
+        let a: Option<i8> = self.stack.pop();
+        let b: Option<i8> = self.stack.pop();
 
-        self.stack.push(if b > a { 1 } else { 0 });
+        match (a, b) {
+            (Some(x), Some(y)) => self.stack.push(if y > x { 1 } else { 0 }),
+            _ => (),
+        }
     }
 
     fn duplicate(&mut self) {
-        let n: i8 = self.stack.pop().unwrap_or(0);
+        let n: Option<i8> = self.stack.pop();
 
-        self.stack.push(n);
-        self.stack.push(n);
+        match n {
+            Some(x) => {
+                self.stack.push(x);
+                self.stack.push(x);
+            },
+            _ => (),
+        }
     }
 
-    fn print_int(&mut self) -> i8 {
-        let n = self.stack.pop().unwrap();
-        print!("{}", n);
+    fn print_int(&mut self) {
+        let n: Option<i8> = self.stack.pop();
 
-        self.output.push_str(n.to_string().as_str());
-
-        return n;
+        match n {
+            Some(x) => {
+                print!("{}", x);
+                self.output.push_str(x.to_string().as_str());
+            },
+            _ => (),
+        }
     }
 
-    fn print_char(&mut self) -> char {
-        let c = self.stack.pop().unwrap() as u8 as char;
-        print!("{}", c);
+    fn print_char(&mut self) {
+        let n: Option<i8> = self.stack.pop();
 
-        self.output.push(c);
-
-        return c;
+        match n {
+            Some(x) => {
+                let c = x as u8 as char;
+                print!("{}", c);
+                self.output.push(c);
+            },
+            _ => (),
+        }
     }
 
     fn enter_string_mode(&mut self) {
@@ -164,24 +198,31 @@ impl Interpreter for Environment {
     }
 
     fn horizontal_if(&mut self) {
-        let n = self.stack.pop().unwrap();
-        if n == 0 {
-            self.pc_direction = PcDirection::Right;
-        } else {
-            self.pc_direction = PcDirection::Left;
+        let n: Option<i8> = self.stack.pop();
+
+        match n {
+            Some(x) => {
+                self.pc_direction = if x == 0 { PcDirection::Right } else {PcDirection::Left };
+            },
+            _ => (),
         }
     }
 
     fn get(&mut self) {
-        let y = self.stack.pop().unwrap();
-        let x = self.stack.pop().unwrap();
+        let y: Option<i8> = self.stack.pop();
+        let x: Option<i8> = self.stack.pop();
 
-        let ch = self.commands
-            .get(y as usize)
-            .unwrap()
-            .as_bytes()[x as usize] as char;
+        match (x, y) {
+            (Some(a), Some(b)) => {
+                let ch = self.commands
+                    .get(b as usize)
+                    .unwrap()
+                    .as_bytes()[a as usize] as char;
 
-        self.stack.push(ch as i8);
+                self.stack.push(ch as i8);
+            },
+            _ => (),
+        }
     }
 
     fn run(&mut self, command: &str) -> &str {
